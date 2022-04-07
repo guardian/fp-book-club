@@ -17,13 +17,13 @@ object Algebra {
   import LettersA.*
   // convenience methods
   def j: Letters =
-    Suspend(J)
+    Element(J)
   def o: Letters =
-    Suspend(O)
+    Element(O)
   def h: Letters =
-    Suspend(H)
+    Element(H)
   def n: Letters =
-    Suspend(N)
+    Element(N)
 
 }
 
@@ -50,9 +50,12 @@ object Interpreter {
 // program
 //*******************************
 def program(): (Letters, Letters) = {
-  val result = n.combineWith(o)
+  val result = Combined(n, o)
 
-  val result2 = j.combineWith(o).combineWith(h).combineWith(n)
+  val result2 = Combined(
+    Combined(j, o),
+    Combined(h, n)
+  )
 
   (result, result2)
 }
@@ -64,8 +67,8 @@ object Main extends App {
 
     val ex = program()
     val (result, result2) = ex
-    val r = result.foldMap(Interpreter.interpret)
-    val r2 = result2.foldMap(Interpreter.interpret)
+    val r = result.foldApply(Interpreter.interpret)
+    val r2 = result2.foldApply(Interpreter.interpret)
     println("result: " + r)
     println("result2: " + r2)
 }

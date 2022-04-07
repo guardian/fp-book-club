@@ -21,7 +21,7 @@ object Algebra {
   // convenience method
   def plus(num1: Int, num2: Int): Calculator =
     Free.liftF[CalculatorA, Int](Plus(num1, num2))
-  
+
 }
 
 import Algebra._

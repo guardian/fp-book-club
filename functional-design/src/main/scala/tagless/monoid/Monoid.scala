@@ -37,12 +37,14 @@ given Letters[String] = new Letters[String] {
 // program
 //*******************************
 def program[A: Monoid]()(using letters: Letters[A]): (A, A) = {
+  import letters.*
+  
   val combine = summon[Monoid[A]].combine _
-  val result = combine(letters.n, letters.o)
+  val result = combine(n, o)
 
   val result2 = combine(
-    combine(letters.j, letters.o),
-    combine(letters.h, letters.n)
+    combine(j, o),
+    combine(h, n)
   )
 
   (result, result2)
