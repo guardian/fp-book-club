@@ -1,5 +1,7 @@
 
+//*******************************
 // Algebra of a calculator
+//*******************************
 object Algebra {
   sealed trait Calculator {
     def flatMap(a: Int => Calculator): Calculator = FlatMap(this, a)
@@ -15,8 +17,26 @@ object Algebra {
 
 }
 
-import Algebra._
+import Algebra.*
+import cats.effect.{ExitCode, IO, IOApp}
 
+
+//*******************************
+// interpreter (for IO)
+//*******************************
+object InterpreterIO {
+  def interpret (calc: Calculator): IO[Int] = calc match {
+    case Number(a) => IO.pure(a)
+    case Plus(a1, a2) => interpret(a1).flatMap(x => interpret(a2).map(y => x + y))
+    case FlatMap(self, a) => interpret(self).flatMap(a.andThen(interpret))
+    case Map(self, a) => interpret(self).map(a)
+  }
+}
+
+
+//*******************************
+// interpreter (for Id)
+//*******************************
 object Interpreter {
   def interpret (calc: Calculator): Int = calc match {
     case Number(a) => a
@@ -26,7 +46,12 @@ object Interpreter {
   }
 }
 
-object Main extends App {
+
+//*******************************
+// program
+//*******************************
+def program() = {
+
   val num1 = Number(1)
   val num2 = Number(4)
 
@@ -42,9 +67,28 @@ object Main extends App {
     z <- Plus(Number(x), Number(4))
   } yield (z)
 
-  println(result)
+  (result, result2)
+}
 
-  println(Interpreter.interpret(result))
+
+//*******************************
+// main
+//*******************************
+object Main extends IOApp {
+
+  override def run(args: List[String]): IO[ExitCode] = {
+
+    val (result, result2) = program()
+
+    println(result)
+
+    println(Interpreter.interpret(result))
+    InterpreterIO.interpret(result).map { r =>
+      println(r)
+      ExitCode.Success
+    }
+  }
+
 }
 
 
